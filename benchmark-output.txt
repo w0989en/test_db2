@@ -1,15 +1,16 @@
-Ready: lib/jcc-12.1.5.0.jar and 1000000 data rows
+Ready: lib/jcc-12.1.5.0.jar and compiled benchmark
 Db2 BENCHDB is ready on 127.0.0.1:50000
 prepared=BENCH_LOAD,BENCH_JDBC
+generated_rows=10000000 file=data/rows.del bytes=457778898 elapsed_seconds=1.178
 
-Number of rows read         = 1000000
+Number of rows read         = 10000000
 Number of rows skipped      = 0
-Number of rows loaded       = 1000000
+Number of rows loaded       = 10000000
 Number of rows rejected     = 0
 Number of rows deleted      = 0
-Number of rows committed    = 1000000
+Number of rows committed    = 10000000
 
-inserted=1000000 elapsed_seconds=6.630 rows_per_second=150822
-method,seconds,rows,rows_per_second
-LOAD,2.611,1000000,382990
-JDBC,6.962,1000000,143636
+inserted=10000000 elapsed_seconds=78.746 rows_per_second=126990
+method,seconds,rows,rows_per_second,file_write_seconds,db_load_seconds
+LOAD,5.945,10000000,1682002,1.243,4.703
+JDBC,79.057,10000000,126492,,

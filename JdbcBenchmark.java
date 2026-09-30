@@ -1,7 +1,12 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,7 +21,12 @@ public class JdbcBenchmark {
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
-            throw new IllegalArgumentException("Usage: JdbcBenchmark prepare | count TABLE | insert FILE BATCH_SIZE");
+            throw new IllegalArgumentException("Usage: JdbcBenchmark generate FILE ROWS | prepare | count TABLE | insert FILE BATCH_SIZE");
+        }
+        if (args[0].equals("generate")) {
+            if (args.length != 3) throw new IllegalArgumentException("generate requires FILE ROWS");
+            generate(Path.of(args[1]), Long.parseLong(args[2]));
+            return;
         }
         String url = required("DB2_URL");
         String user = required("DB2_USER");
@@ -46,6 +56,39 @@ public class JdbcBenchmark {
         String value = System.getenv(name);
         if (value == null || value.isBlank()) throw new IllegalArgumentException(name + " is required");
         return value;
+    }
+
+    private static void generate(Path file, long rows) throws Exception {
+        if (rows < 1) throw new IllegalArgumentException("ROWS must be positive");
+        Files.createDirectories(file.toAbsolutePath().getParent());
+        Path temporary = file.resolveSibling(file.getFileName() + ".tmp");
+        long started = System.nanoTime();
+        try {
+            try (FileChannel channel = FileChannel.open(temporary,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+                 BufferedWriter output = new BufferedWriter(
+                         Channels.newWriter(channel, StandardCharsets.US_ASCII), 1024 * 1024)) {
+                for (long id = 1; id <= rows; id++) {
+                    String digits = Long.toString(id);
+                    output.write(digits);
+                    output.write(",payload-");
+                    for (int padding = digits.length(); padding < 7; padding++) output.write('0');
+                    output.write(digits);
+                    output.write("-abcdefghijklmnop,");
+                    output.write(Long.toString(id % 10000));
+                    output.newLine();
+                }
+                output.flush();
+                channel.force(true);
+            }
+            Files.move(temporary, file, StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+        double seconds = (System.nanoTime() - started) / 1_000_000_000.0;
+        System.out.printf(Locale.ROOT, "generated_rows=%d file=%s bytes=%d elapsed_seconds=%.3f%n",
+                rows, file, Files.size(file), seconds);
     }
 
     private static String allowedTable(String table) {
