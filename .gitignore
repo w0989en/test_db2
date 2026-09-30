@@ -1,0 +1,5 @@
+.local/
+data/
+lib/
+*.class
+__pycache__/
