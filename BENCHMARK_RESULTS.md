@@ -1,11 +1,11 @@
 # Db2 1000 萬筆寫入實測
 
-測試日期：2026-09-30 UTC。兩種方法各執行一輪，使用相同資料檔、相同欄位與沒有索引的空表。
+測試日期：2026-09-30 UTC。下表為每 1,000 筆執行 JDBC 批次及提交的基準測試；每 10,000 筆的追加測試見下方。兩種方法使用相同資料檔、相同欄位與沒有索引的空表。
 
 | 方法 | 總耗時（秒） | Java 寫檔（秒） | Db2 LOAD（秒） | 寫入筆數 | 每秒筆數 |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Db2 原生 LOAD（含 Java 產檔） | 5.945 | 1.243 | 4.703 | 10,000,000 | 1,682,002 |
-| Java JDBC 批次 INSERT | 79.057 | — | — | 10,000,000 | 126,492 |
+| Java JDBC 批次 INSERT（每 1,000 筆提交） | 79.057 | — | — | 10,000,000 | 126,492 |
 
 本輪含產檔的 LOAD 總吞吐量約為 JDBC 的 **13.3 倍**。這是此雲端環境的一次量測；`LOAD` 的總時間包含 Java 寫檔，JDBC 的時間只包含讀取現有檔案與寫入資料庫，因此兩列的工作範圍不同。
 
@@ -30,3 +30,18 @@ LOAD 回報讀取、載入與提交均為 10,000,000 筆，略過、拒絕與刪
 LOAD 的 `NONRECOVERABLE` 使用大量載入路徑，JDBC 使用一般交易日誌路徑，因此兩種方法的復原成本不同。
 
 原始資料：[benchmark-results.csv](benchmark-results.csv)、[benchmark-output.txt](benchmark-output.txt)、[benchmark-validation.txt](benchmark-validation.txt)。
+
+## JDBC 每 10,000 筆提交的追加測試
+
+使用同一份 1000 萬筆 DEL 檔與同一個 Db2 實例，先以 `TRUNCATE TABLE BENCH_JDBC IMMEDIATE` 清空 JDBC 測試表，再執行 `JdbcBenchmark insert data/rows.del 10000`。`executeBatch()` 與 `commit()` 的間隔都改為 10,000 筆，共提交 1,000 次。清表與驗證查詢不計時；本次沒有重跑 LOAD。
+
+| JDBC 批次及提交筆數 | 完整 Java 命令（秒） | Java 內部插入計時（秒） | 寫入筆數 | 每秒筆數（完整命令） |
+| --- | ---: | ---: | ---: | ---: |
+| 1,000（前次基準） | 79.057 | 78.746 | 10,000,000 | 126,492 |
+| 10,000（本次） | 78.981 | 77.370 | 10,000,000 | 126,613 |
+
+完整命令少了 0.076 秒，約 **0.1%**；Java 內部插入計時少了 1.376 秒，約 **1.7%**。這是兩個批次大小各一次的量測，完整命令未觀察到明顯加速。完整命令另包含 JVM 啟動與資料庫連線，因此它與內部插入時間的差額會隨每次執行改變。
+
+本次輸入檔的行數與 SHA-256 均和基準相同，插入後 `COUNT(*)` 為 10,000,000，ID 範圍為 1 到 10,000,000，ID 合計為 50,000,005,000,000；與保留的 LOAD 表做雙向 `EXCEPT ALL`，兩個方向都為 0 筆差異。
+
+追加測試資料：[benchmark-jdbc-10000-results.csv](benchmark-jdbc-10000-results.csv)、[benchmark-jdbc-10000-output.txt](benchmark-jdbc-10000-output.txt)、[benchmark-jdbc-10000-validation.txt](benchmark-jdbc-10000-validation.txt)。

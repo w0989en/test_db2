@@ -1,0 +1,2 @@
+method,batch_size,seconds,rows,rows_per_second
+JDBC,10000,78.981,10000000,126613

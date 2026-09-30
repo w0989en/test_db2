@@ -1,3 +1,3 @@
-method,seconds,rows,rows_per_second,file_write_seconds,db_load_seconds
-LOAD,5.945,10000000,1682002,1.243,4.703
-JDBC,79.057,10000000,126492,,
+method,seconds,rows,rows_per_second,file_write_seconds,db_load_seconds,batch_size
+LOAD,5.945,10000000,1682002,1.243,4.703,
+JDBC,79.057,10000000,126492,,,1000

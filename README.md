@@ -1,6 +1,6 @@
 # Db2：1000 萬筆檔案寫入效能比較
 
-使用同一份 1000 萬行 DEL 檔、相同欄位且沒有索引的兩張空表，比較 Db2 原生 `LOAD` 與 Java JDBC 批次 `INSERT`。JDBC 每 1,000 筆執行批次並提交一次。兩張表各自核對 `COUNT(*) = 10000000`。
+使用同一份 1000 萬行 DEL 檔、相同欄位且沒有索引的兩張空表，比較 Db2 原生 `LOAD` 與 Java JDBC 批次 `INSERT`。JDBC 預設每 1,000 筆執行批次並提交一次，可用命令參數指定批次大小。兩張表各自核對 `COUNT(*) = 10000000`。
 
 需求：可用的 Docker daemon、Python 3、Java 21、`curl`、`openssl`、`rg`，以及能存取 `icr.io`、`dd2.icr.io` 與 Maven Central 的網路。Db2 容器使用固定 digest 的 IBM Db2 12.1.5 映像，建立 `BENCHDB`。本機資料、驅動及容器密碼都放在 Git 忽略的目錄。
 
@@ -9,6 +9,8 @@ cd /workspace/test_db2
 chmod +x setup.sh start_db2.sh prepare_db2_image.sh run_benchmark.sh
 ./run_benchmark.sh
 ```
+
+要測試每 10,000 筆執行批次並提交一次，執行 `./run_benchmark.sh 10000`。CSV 的 `batch_size` 記錄 JDBC 批次及提交筆數，LOAD 此欄留白。
 
 `setup.sh` 下載 IBM JDBC 驅動、核對 Maven Central 公布的 SHA-1，並編譯 Java 程式。`start_db2.sh` 只在本機容器不存在時建立它，並等待資料庫可連線。每次執行 `run_benchmark.sh` 都會重建兩張空表，再由 Java 重新產生 1000 萬行 `data/rows.del`。原生 `LOAD` 需要伺服器能讀取檔案，因此容器以唯讀方式掛載 `data/`。兩個方法都讀取同一份檔案。
 

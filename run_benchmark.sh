@@ -2,6 +2,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+[[ "$#" -le 1 ]] || { echo "Usage: $0 [BATCH_SIZE]" >&2; exit 1; }
+batch_size="${1:-1000}"
+[[ "$batch_size" =~ ^[1-9][0-9]*$ ]] || { echo "BATCH_SIZE must be a positive integer" >&2; exit 1; }
+
 ./setup.sh
 ./start_db2.sh
 set -a
@@ -30,18 +34,18 @@ load_rows="$(java -cp "$classpath" JdbcBenchmark count BENCH_LOAD)"
 [[ "$load_rows" -eq "$benchmark_rows" ]] || { echo "LOAD row count: $load_rows" >&2; exit 1; }
 
 start_ns="$(date +%s%N)"
-java -cp "$classpath" JdbcBenchmark insert data/rows.del 1000
+java -cp "$classpath" JdbcBenchmark insert data/rows.del "$batch_size"
 jdbc_ns="$(( $(date +%s%N) - start_ns ))"
 jdbc_rows="$(java -cp "$classpath" JdbcBenchmark count BENCH_JDBC)"
 [[ "$jdbc_rows" -eq "$benchmark_rows" ]] || { echo "JDBC row count: $jdbc_rows" >&2; exit 1; }
 
 result_file=benchmark-results.csv
 {
-    printf 'method,seconds,rows,rows_per_second,file_write_seconds,db_load_seconds\n'
+    printf 'method,seconds,rows,rows_per_second,file_write_seconds,db_load_seconds,batch_size\n'
     awk -v ns="$load_ns" -v file_ns="$file_ns" -v db_ns="$db_load_ns" -v rows="$load_rows" \
-        'BEGIN { sec=ns/1000000000; printf "LOAD,%.3f,%d,%.0f,%.3f,%.3f\n", sec, rows, rows/sec, file_ns/1000000000, db_ns/1000000000 }'
-    awk -v ns="$jdbc_ns" -v rows="$jdbc_rows" \
-        'BEGIN { sec=ns/1000000000; printf "JDBC,%.3f,%d,%.0f,,\n", sec, rows, rows/sec }'
+        'BEGIN { sec=ns/1000000000; printf "LOAD,%.3f,%d,%.0f,%.3f,%.3f,\n", sec, rows, rows/sec, file_ns/1000000000, db_ns/1000000000 }'
+    awk -v ns="$jdbc_ns" -v rows="$jdbc_rows" -v batch_size="$batch_size" \
+        'BEGIN { sec=ns/1000000000; printf "JDBC,%.3f,%d,%.0f,,,%d\n", sec, rows, rows/sec, batch_size }'
 } > "${result_file}.tmp"
 mv "${result_file}.tmp" "$result_file"
 cat "$result_file"
