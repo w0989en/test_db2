@@ -1,0 +1,15 @@
+Ready: lib/jcc-12.1.5.0.jar and 1000000 data rows
+Db2 BENCHDB is ready on 127.0.0.1:50000
+prepared=BENCH_LOAD,BENCH_JDBC
+
+Number of rows read         = 1000000
+Number of rows skipped      = 0
+Number of rows loaded       = 1000000
+Number of rows rejected     = 0
+Number of rows deleted      = 0
+Number of rows committed    = 1000000
+
+inserted=1000000 elapsed_seconds=6.630 rows_per_second=150822
+method,seconds,rows,rows_per_second
+LOAD,2.611,1000000,382990
+JDBC,6.962,1000000,143636

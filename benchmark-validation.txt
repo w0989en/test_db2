@@ -1,0 +1,19 @@
+DIFFERENT_ROWS
+--------------
+             0
+
+  1 record(s) selected.
+
+
+ROWS        MIN_ID               MAX_ID               ID_SUM
+----------- -------------------- -------------------- --------------------
+    1000000                    1              1000000         500000500000
+
+  1 record(s) selected.
+
+DB21085I  This instance or install (instance name, where applicable:
+"db2inst1") uses "64" bits and DB2 code release "SQL12015" with level
+identifier "02060110".
+Informational tokens are "DB2 v12.1.5.0", "special_85816",
+"DYN2606252315AMD64_85816", and Fix Pack "0".
+Product is installed at "/opt/ibm/db2/V12.1".
