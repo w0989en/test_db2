@@ -21,3 +21,5 @@ Docker 使用 `vfs` 時，`prepare_db2_image.sh` 會先核對完整映像的內�
 `LOAD` 走 Db2 大量載入路徑，JDBC 走一般交易日誌路徑；而且 `LOAD` 的總時間依需求包含產檔，JDBC 的時間不含產檔。比較時應留意這些範圍差異。若需要穩定的吞吐量估計，可在同一台機器上重複執行數次。
 
 已完成的實測結果與測試條件見 [BENCHMARK_RESULTS.md](BENCHMARK_RESULTS.md)。
+
+Db2 Federation 的 UTF-8／Big5 難字相容性測試、重跑方式及實測證據見 [federation/README.md](federation/README.md)。
