@@ -2,6 +2,8 @@
 
 這組測試重現 Big5（Code Page 950）資料庫透過 DRDA Nickname 查詢 UTF-8（1208）資料庫的行為，涵蓋一般中文、難字、混合字串、Emoji、批次查詢與來源 HEX 傳遞，另含「堃」（U+5803）的獨立案例。實測結果見 [RESULTS.md](RESULTS.md)。
 
+現場 SQLDBx 截圖的差異分析、CHAR(114)／Nickname CHAR(228)／UNION ALL 補測及現場查證 SQL，見 [SCREENSHOT_COMPARISON.md](SCREENSHOT_COMPARISON.md)。
+
 ## 初次建置
 
 在專案根目錄啟動既有實驗容器，再建立測試環境：

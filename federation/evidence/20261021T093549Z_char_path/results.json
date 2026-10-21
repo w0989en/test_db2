@@ -1,0 +1,124 @@
+{
+  "results": [
+    {
+      "step": "01_source_setup",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "step": "02_federation_setup",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "step": "03_source_before",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "step": "04_nickname",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "step": "05_union",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "step": "06_capture",
+      "exit_code": 1,
+      "sqlcodes": [
+        0,
+        100,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "step": "07_metadata",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "step": "08_source_after",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "local_capture": [
+    {
+      "origin": "LOCAL",
+      "id": 2,
+      "text": "王小明",
+      "big5_hex": "A4FDA470A9FA"
+    },
+    {
+      "origin": "LOCAL",
+      "id": 6,
+      "text": "�",
+      "big5_hex": "C8FE"
+    },
+    {
+      "origin": "REMOTE",
+      "id": 2,
+      "text": "王小明",
+      "big5_hex": "A4FDA470A9FA"
+    },
+    {
+      "origin": "REMOTE",
+      "id": 6,
+      "text": "�",
+      "big5_hex": "C8FE"
+    }
+  ],
+  "validation": {
+    "source_before_matches": true,
+    "source_after_matches": true,
+    "four_union_rows_captured": true
+  },
+  "scope": "The local CHAR(76) table was filled via the nickname; it is not a reproduction of the other environment's original CP950 bytes."
+}
