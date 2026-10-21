@@ -1,0 +1,391 @@
+{
+  "run_id": "20261021T023500Z",
+  "container": "db2-bench-1m",
+  "source": "FNEW1208",
+  "federation": "FOLD950",
+  "expected_source_hex": {
+    "1": "414243313233",
+    "2": "E78E8BE5B08FE6988E",
+    "3": "F0A0AEB7",
+    "4": "E999B3F0A0AEB7E7A5A5",
+    "5": "F09F9880"
+  },
+  "results": [
+    {
+      "case": "03_source_setup",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "05_federation_setup",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "06_source_before",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        5
+      ]
+    },
+    {
+      "case": "TC01",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        2
+      ]
+    },
+    {
+      "case": "TC02",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        1
+      ]
+    },
+    {
+      "case": "TC03",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        1
+      ]
+    },
+    {
+      "case": "TC04",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        1
+      ]
+    },
+    {
+      "case": "TC05",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        5
+      ]
+    },
+    {
+      "case": "TC06",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        5
+      ]
+    },
+    {
+      "case": "07_clear_local_capture",
+      "exit_code": 1,
+      "sqlcodes": [
+        0,
+        100,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "02000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "08_capture_1",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "08_capture_2",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "08_capture_3",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "08_capture_4",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "08_capture_5",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": []
+    },
+    {
+      "case": "09_local_hex",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        5
+      ]
+    },
+    {
+      "case": "10_source_after",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        5
+      ]
+    },
+    {
+      "case": "11_metadata",
+      "exit_code": 0,
+      "sqlcodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "sqlstates": [
+        "00000",
+        "00000",
+        "00000",
+        "00000",
+        "00000"
+      ],
+      "selected_rows": [
+        1,
+        1,
+        8
+      ]
+    }
+  ],
+  "status": "completed",
+  "local_capture": [
+    {
+      "id": 1,
+      "case_name": "ASCII",
+      "text": "ABC123",
+      "big5_hex": "414243313233",
+      "byte_length": 6
+    },
+    {
+      "id": 2,
+      "case_name": "BIG5",
+      "text": "王小明",
+      "big5_hex": "A4FDA470A9FA",
+      "byte_length": 6
+    },
+    {
+      "id": 3,
+      "case_name": "UNICODE",
+      "text": "�",
+      "big5_hex": "C8FE",
+      "byte_length": 2
+    },
+    {
+      "id": 4,
+      "case_name": "MIXED",
+      "text": "陳�祥",
+      "big5_hex": "B3AFC8FEB2BB",
+      "byte_length": 6
+    },
+    {
+      "id": 5,
+      "case_name": "EMOJI",
+      "text": "�",
+      "big5_hex": "C8FE",
+      "byte_length": 2
+    }
+  ],
+  "validation": {
+    "source_before_matches_expected": true,
+    "source_after_matches_expected": true,
+    "source_unchanged": true,
+    "tc06_hex_matches_source": true
+  }
+}
