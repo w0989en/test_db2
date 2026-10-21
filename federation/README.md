@@ -1,6 +1,6 @@
 # Db2 Federation UTF-8／Big5 實測
 
-這組測試重現 Big5（Code Page 950）資料庫透過 DRDA Nickname 查詢 UTF-8（1208）資料庫的行為，涵蓋一般中文、難字、混合字串、Emoji、批次查詢與來源 HEX 傳遞。實測結果見 [RESULTS.md](RESULTS.md)。
+這組測試重現 Big5（Code Page 950）資料庫透過 DRDA Nickname 查詢 UTF-8（1208）資料庫的行為，涵蓋一般中文、難字、混合字串、Emoji、批次查詢與來源 HEX 傳遞，另含「堃」（U+5803）的獨立案例。實測結果見 [RESULTS.md](RESULTS.md)。
 
 ## 初次建置
 
@@ -23,6 +23,14 @@ python3 federation/run_tests.py
 
 重跑只會清空並重新寫入本測試專用的 `FOLD950.TESTCP.LOCAL_CAPTURE`。來源資料保持不變，每次執行的 SQL、原始輸出與 `results.json` 寫入新的 `evidence/<UTC時戳>/`。
 
+若沿用較早版本的五筆測試資料，先執行以下指令加入第六筆「堃」，並完成整組測試：
+
+```bash
+python3 federation/run_tests.py --add-kun
+```
+
+此選項只在來源表缺少 ID=6 時新增測試資料，不會覆寫已有資料；新建環境的 `--setup` 已包含這筆。來源前後完整性比較以新增後的六筆資料為基準。之後使用一般重跑指令即可。
+
 腳本固定使用 `unix:///var/run/docker.sock`，清除 Docker endpoint、context 與 TLS 選擇變數，保留既有 Docker 設定與 registry 憑證。
 
 ## 測試方式與判讀
@@ -35,14 +43,15 @@ SQL 使用 Linux Db2 CLP、`LANG=en_US.UTF-8` 與 `DB2CODEPAGE=1208`。用戶端
 | TC02 | `𠮷`（U+20BB7） |
 | TC03 | `陳𠮷祥` |
 | TC04 | `😀` |
-| TC05 | 一次查詢五筆資料 |
+| TC05 | 一次查詢全部六筆資料 |
 | TC06 | 查詢由來源 VIEW 預先計算的 UTF-8 HEX |
+| TC07 | `堃`（U+5803；來源 UTF-8 HEX `E5A083`） |
 
 接著逐筆將 Nickname 結果寫入 Big5 本地表，再計算該表的 `HEX(TEST_TEXT)`。這避免直接對 Nickname 計算 HEX 時，運算被推送至 UTF-8 遠端而誤判。
 
 `results.json` 保留每個 SQL 的 CLP exit code、SQLCODE、SQLSTATE、返回筆數，以及本地儲存的文字、HEX 和長度。四項自動核對涵蓋來源前後 ID／HEX 與預期一致、來源不變，以及 TC06 ID／HEX 與來源一致。核對失敗會以非零狀態結束。
 
-TC02–TC05 屬行為觀察，SQL 錯誤也會保留證據並繼續其他案例；不能只以腳本 exit code 或 SQLCODE=0 判定所有文字完整。請閱讀案例輸出及本地儲存的 HEX。
+TC02–TC05 與 TC07 屬行為觀察，SQL 錯誤也會保留證據並繼續其他案例；不能只以腳本 exit code 或 SQLCODE=0 判定所有文字完整。請閱讀案例輸出及本地儲存的 HEX。
 
 建立 server 的 `PASSWORD` 採雙引號識別字語法，user mapping 的 `REMOTE_PASSWORD` 採字串語法。腳本使用既有實驗環境檔中的密碼，輸出與 SQL 證據以 `<LAB_PASSWORD>` 遮蔽；佔位文字不能直接當成密碼執行。
 

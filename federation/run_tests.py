@@ -15,7 +15,7 @@ ENV = {k: v for k, v in os.environ.items() if k not in {
     "DOCKER_HOST", "DOCKER_CONTEXT", "DOCKER_TLS", "DOCKER_TLS_VERIFY", "DOCKER_CERT_PATH"}}
 DOCKER = ["docker", "--host=unix:///var/run/docker.sock"]
 EXPECTED = {1: "414243313233", 2: "E78E8BE5B08FE6988E", 3: "F0A0AEB7",
-            4: "E999B3F0A0AEB7E7A5A5", 5: "F09F9880"}
+            4: "E999B3F0A0AEB7E7A5A5", 5: "F09F9880", 6: "E5A083"}
 
 
 def docker(*args, input=None):
@@ -25,7 +25,7 @@ def docker(*args, input=None):
 
 def source_rows(output):
     return {int(row_id): hex_value for row_id, hex_value in re.findall(
-        r"^\s*(\d+)\s+(?:ASCII|BIG5|UNICODE|MIXED|EMOJI)\s+\S+\s+([0-9A-F]+)\s*$",
+        r"^\s*(\d+)\s+(?:ASCII|BIG5|UNICODE|MIXED|EMOJI|KUN)\s+\S+\s+([0-9A-F]+)\s*$",
         output, re.M)}
 
 
@@ -33,13 +33,14 @@ def local_rows(output):
     return [{"id": int(row_id), "case_name": name, "text": text,
              "big5_hex": hex_value, "byte_length": int(length)}
             for row_id, name, text, hex_value, length in re.findall(
-                r"^\s*(\d+)\s+(ASCII|BIG5|UNICODE|MIXED|EMOJI)\s+(\S+)\s+([0-9A-F]+)\s+(\d+)\s*$",
+                r"^\s*(\d+)\s+(ASCII|BIG5|UNICODE|MIXED|EMOJI|KUN)\s+(\S+)\s+([0-9A-F]+)\s+(\d+)\s*$",
                 output, re.M)]
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--setup", action="store_true", help="Create databases and objects; use only for first setup")
+    parser.add_argument("--add-kun", action="store_true", help="Add the 堃 test row to an existing five-row lab dataset")
     args = parser.parse_args()
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out = ROOT / "evidence" / run_id
@@ -103,7 +104,7 @@ CREATE SCHEMA TESTCP;
 CREATE TABLE TESTCP.T_UTF8_CHAR (ID INTEGER NOT NULL PRIMARY KEY, CASE_NAME VARCHAR(30), TEST_TEXT VARCHAR(100));
 INSERT INTO TESTCP.T_UTF8_CHAR VALUES
   (1, 'ASCII', 'ABC123'), (2, 'BIG5', '王小明'), (3, 'UNICODE', '𠮷'),
-  (4, 'MIXED', '陳𠮷祥'), (5, 'EMOJI', '😀');
+  (4, 'MIXED', '陳𠮷祥'), (5, 'EMOJI', '😀'), (6, 'KUN', '堃');
 CREATE VIEW TESTCP.V_UTF8_HEX AS SELECT ID, HEX(TEST_TEXT) AS UTF8_HEX FROM TESTCP.T_UTF8_CHAR;
 """)
         command("04_catalog", "db2 catalog tcpip node UTF8NODE remote 127.0.0.1 server 50000 && db2 catalog database FNEW1208 as RNEW1208 at node UTF8NODE && db2 terminate")
@@ -121,10 +122,17 @@ CREATE NICKNAME TESTCP.N_UTF8_HEX FOR NEW_DW_SERVER.\"TESTCP\".\"V_UTF8_HEX\";
 CREATE TABLE TESTCP.LOCAL_CAPTURE (ID INTEGER NOT NULL PRIMARY KEY, CASE_NAME VARCHAR(30), TEST_TEXT VARCHAR(100));
 """)
 
+    if args.add_kun:
+        sql("05a_add_kun", "FNEW1208", """
+INSERT INTO TESTCP.T_UTF8_CHAR (ID, CASE_NAME, TEST_TEXT)
+SELECT 6, 'KUN', '堃' FROM SYSIBM.SYSDUMMY1
+WHERE NOT EXISTS (SELECT 1 FROM TESTCP.T_UTF8_CHAR WHERE ID = 6);
+""")
+
     source_select = "SELECT ID, CASE_NAME, TEST_TEXT, HEX(TEST_TEXT) AS UTF8_HEX FROM TESTCP.T_UTF8_CHAR ORDER BY ID;"
     before = sql("06_source_before", "FNEW1208", source_select)
     if source_rows(before) != EXPECTED:
-        raise RuntimeError("Source baseline differs from expected ID/HEX values")
+        raise RuntimeError("Source baseline differs from expected ID/HEX values; older five-row labs need --add-kun")
     case_outputs = {}
     for label, statement in [
         ("TC01", "SELECT ID, TEST_TEXT FROM TESTCP.N_UTF8_CHAR WHERE ID IN (1, 2) ORDER BY ID;"),
@@ -133,6 +141,7 @@ CREATE TABLE TESTCP.LOCAL_CAPTURE (ID INTEGER NOT NULL PRIMARY KEY, CASE_NAME VA
         ("TC04", "SELECT ID, TEST_TEXT FROM TESTCP.N_UTF8_CHAR WHERE ID = 5;"),
         ("TC05", "SELECT ID, CASE_NAME, TEST_TEXT FROM TESTCP.N_UTF8_CHAR ORDER BY ID;"),
         ("TC06", "SELECT ID, UTF8_HEX FROM TESTCP.N_UTF8_HEX ORDER BY ID;"),
+        ("TC07", "SELECT ID, TEST_TEXT FROM TESTCP.N_UTF8_CHAR WHERE ID = 6;"),
     ]:
         case_outputs[label] = sql(label, "FOLD950", statement, strict=False)
 

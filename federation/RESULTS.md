@@ -1,6 +1,6 @@
 # Db2 Federation UTF-8／Big5 測試結果
 
-**結論：六個查詢皆成功，但直接查詢會靜默替代 Big5 無法表示的字元。`𠮷` 與 `😀` 在舊端實際存成 `C8FE`，UTF-8 用戶端顯示為 `�`，不是 `?`。由新端 VIEW 計算後傳回的 UTF-8 HEX 則完整一致。**
+**結論：查詢可成功，但直接查詢會靜默替代 Big5 無法表示的字元。`𠮷`、`😀` 與補充測試的 `堃` 在舊端實際存成 `C8FE`，UTF-8 用戶端顯示為 `�`，不是 `?`。由新端 VIEW 計算後傳回的 UTF-8 HEX 則完整一致。**
 
 本次依測試計畫建立本機實驗環境，未連接實際新舊 DW。建置及測試於 2026-10-21 10:35:00（Asia/Taipei，UTC+8）開始，以下原始證據來自這次實際執行，目錄使用 UTC 時戳 [20261021T023500Z](evidence/20261021T023500Z)。
 
@@ -19,7 +19,7 @@
 
 環境配置見 [02_environment.log](evidence/20261021T023500Z/02_environment.log)，wrapper、server 與欄位資訊見 [11_metadata.log](evidence/20261021T023500Z/11_metadata.log)。
 
-## TC01–TC06 結果
+## 原始 TC01–TC06 結果（五筆資料）
 
 | 案例 | 實際結果（UTF-8 用戶端顯示） | 返回筆數 | SQLCODE | SQLSTATE | 判定 |
 |---|---|---:|---:|---|---|
@@ -53,6 +53,22 @@
 [06_source_before.log](evidence/20261021T023500Z/06_source_before.log) 與 [10_source_after.log](evidence/20261021T023500Z/10_source_after.log) 的五筆 ID／UTF-8 HEX 完全相同，來源資料未修改。TC06 的五筆 ID／HEX 亦完全相符，四項自動核對皆為 `true`，見 [results.json](evidence/20261021T023500Z/results.json)。
 
 TC06 的 HEX 由來源 VIEW 先計算，再以 ASCII 文字通過 Nickname。本次驗證的是這五筆資料以 HEX 保留原始位元組；一般 VARCHAR Nickname 仍會轉碼失真。若採用 HEX 方式，應在支援 UTF-8 的接收端解 HEX 並按 UTF-8 解碼，保留 ID 對應。
+
+## 補充 TC07：「堃」（U+5803）
+
+於 2026-10-21 17:05:40（Asia/Taipei，UTC+8）在同一實驗環境加入 ID=6、CASE_NAME=`KUN`、TEST_TEXT=`堃`，並完整重跑 TC01–TC07。本次六筆資料的證據位於 [20261021T090540Z](evidence/20261021T090540Z)。
+
+| 檢查 | 實測結果 | 證據 |
+|---|---|---|
+| 新端來源值 | `堃`；UTF-8 HEX 為 `E5A083`（3 位元組） | [06_source_before.log](evidence/20261021T090540Z/06_source_before.log) |
+| TC07 Nickname 查詢 | 返回一筆，文字為 `�`；SQLCODE=0、SQLSTATE=00000，SQLCA 無警告 | [TC07.log](evidence/20261021T090540Z/TC07.log) |
+| 舊端本地儲存 | ID=6 的 HEX 為 `C8FE`（2 位元組）；文字顯示為 `�` | [09_local_hex.log](evidence/20261021T090540Z/09_local_hex.log) |
+| TC06 原始 HEX 通道 | ID=6 正確返回 `E5A083` | [TC06.log](evidence/20261021T090540Z/TC06.log) |
+| 查詢後來源值 | `堃` 與 `E5A083` 保持不變 | [10_source_after.log](evidence/20261021T090540Z/10_source_after.log) |
+
+七個 SELECT 的 SQLCODE 均為 0、SQLSTATE 均為 00000；TC05 與 TC06 各返回六筆。六次寫入舊端本地驗證表的 INSERT 也皆成功。六筆來源前後與預期 HEX 完全一致，TC06 的六筆 ID／HEX 與來源完全一致，四項自動核對皆為 `true`，見 [results.json](evidence/20261021T090540Z/results.json)。
+
+**因此，「堃」在本次 Db2 Code Page 950 路徑也無法完整保留。** 此案例涵蓋 Unicode BMP 內的三位元組 UTF-8 漢字。來源完整性比較以新增第六筆後、開始查詢前的資料為基準；測試準備階段的新增紀錄另存於 [05a_add_kun.log](evidence/20261021T090540Z/05a_add_kun.log)。
 
 ## 適用範圍
 
